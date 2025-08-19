@@ -9,11 +9,11 @@ import InfluencerDetail from './InfluencerDetail'
 
 // 샘플 데이터
 const influencerData = [
-  { username: 'omuk_food', followers: 1372088, engagement: 0.19, verified: true, category: 'Food' },
-  { username: 'chang_bae_cc', followers: 143797, engagement: 0.59, verified: true, category: 'Food' },
-  { username: 'yeonsu222', followers: 41768, engagement: 0.04, verified: false, category: 'Lifestyle' },
-  { username: 'wild_guys__', followers: 38546, engagement: 11.54, verified: false, category: 'Food' },
-  { username: 'mywayflover', followers: 27368, engagement: 49.06, verified: false, category: 'Entertainment' },
+  { username: 'omuk_food', followers: 1372088, engagement_rate: 0.19, is_verified: true, category: 'Food' },
+  { username: 'chang_bae_cc', followers: 143797, engagement_rate: 0.59, is_verified: true, category: 'Food' },
+  { username: 'yeonsu222', followers: 41768, engagement_rate: 0.04, is_verified: false, category: 'Lifestyle' },
+  { username: 'wild_guys__', followers: 38546, engagement_rate: 11.54, is_verified: false, category: 'Food' },
+  { username: 'mywayflover', followers: 27368, engagement_rate: 49.06, is_verified: false, category: 'Entertainment' },
 ]
 
 const followerRangeData = [
@@ -91,8 +91,6 @@ interface InfluencerData {
   category?: string
   ai_grade?: string
   ai_score?: number
-  engagement?: number // for backward compatibility
-  verified?: boolean // for backward compatibility
 }
 
 interface InfluencerDashboardProps {
@@ -136,16 +134,11 @@ const InfluencerDashboard: React.FC<InfluencerDashboardProps> = ({ crawledData =
   }
   
   // 크롤링 데이터가 있으면 사용, 없으면 샘플 데이터 사용
-  const currentData = crawledData.length > 0 ? crawledData.map(inf => ({
-    ...inf,
-    engagement: inf.engagement_rate || inf.engagement || 0,
-    verified: inf.is_verified !== undefined ? inf.is_verified : inf.verified || false,
-    category: inf.category || 'Unknown'
-  })) : influencerData
+  const currentData = crawledData.length > 0 ? crawledData : influencerData
   
   const totalFollowers = currentData.reduce((sum, inf) => sum + inf.followers, 0)
-  const avgEngagement = currentData.reduce((sum, inf) => sum + (inf.engagement_rate || inf.engagement || 0), 0) / currentData.length
-  const verifiedCount = currentData.filter(inf => inf.is_verified || inf.verified).length
+  const avgEngagement = currentData.reduce((sum, inf) => sum + (inf.engagement_rate || 0), 0) / currentData.length
+  const verifiedCount = currentData.filter(inf => inf.is_verified).length
 
   // 동적으로 차트 데이터 생성
   const dynamicFollowerRangeData = React.useMemo(() => {
