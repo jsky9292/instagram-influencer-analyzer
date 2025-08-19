@@ -167,13 +167,18 @@ async def crawl_hashtag(request: dict):
             yield f"data: {json.dumps({'progress': f'#{translated_hashtag} 해시태그 실시간 크롤링 시작...'})}\n\n"
             await asyncio.sleep(0.1)
             
-            # Config에서 인증 정보 사용
-            if not config or 'instagram' not in config:
-                yield f"data: {json.dumps({'error': 'Instagram 인증 정보가 없습니다. config.json을 확인해주세요.'})}\n\n"
-                return
+            # 환경변수에서 인증 정보 가져오기 (Render.com)
+            username = os.environ.get('INSTAGRAM_USERNAME')
+            password = os.environ.get('INSTAGRAM_PASSWORD')
             
-            username = config['instagram']['username']
-            password = config['instagram']['password']
+            # 환경변수가 없으면 config.json 사용 (로컬 개발용)
+            if not username or not password:
+                if config and 'instagram' in config:
+                    username = config['instagram']['username']
+                    password = config['instagram']['password']
+                else:
+                    yield f"data: {json.dumps({'error': 'Instagram 인증 정보가 없습니다. 환경변수를 설정해주세요.'})}\n\n"
+                    return
             
             yield f"data: {json.dumps({'progress': '크롤러 초기화 중...'})}\n\n"
             await asyncio.sleep(0.1)
@@ -284,13 +289,18 @@ async def analyze_user(request: dict):
             yield f"data: {json.dumps({'progress': f'@{username} 프로필 분석 시작...'})}\n\n"
             await asyncio.sleep(0.5)
             
-            # Config에서 인증 정보 사용
-            if not config or 'instagram' not in config:
-                yield f"data: {json.dumps({'error': 'Instagram 인증 정보가 없습니다.'})}\n\n"
-                return
+            # 환경변수에서 인증 정보 가져오기 (Render.com)
+            username_auth = os.environ.get('INSTAGRAM_USERNAME')
+            password = os.environ.get('INSTAGRAM_PASSWORD')
             
-            username_auth = config['instagram']['username']
-            password = config['instagram']['password']
+            # 환경변수가 없으면 config.json 사용 (로컬 개발용)
+            if not username_auth or not password:
+                if config and 'instagram' in config:
+                    username_auth = config['instagram']['username']
+                    password = config['instagram']['password']
+                else:
+                    yield f"data: {json.dumps({'error': 'Instagram 인증 정보가 없습니다. 환경변수를 설정해주세요.'})}\n\n"
+                    return
             
             # 크롤러 초기화
             crawler = InstagramCrawler(
@@ -462,13 +472,18 @@ async def analyze_viral_content(request: dict):
             yield f"data: {json.dumps({'progress': f'@{username} 콘텐츠 분석 시작...'})}\n\n"
             await asyncio.sleep(0.5)
             
-            # Config에서 인증 정보 사용
-            if not config or 'instagram' not in config:
-                yield f"data: {json.dumps({'error': 'Instagram 인증 정보가 없습니다.'})}\n\n"
-                return
+            # 환경변수에서 인증 정보 가져오기 (Render.com)
+            username_auth = os.environ.get('INSTAGRAM_USERNAME')
+            password = os.environ.get('INSTAGRAM_PASSWORD')
             
-            username_auth = config['instagram']['username']
-            password = config['instagram']['password']
+            # 환경변수가 없으면 config.json 사용 (로컬 개발용)
+            if not username_auth or not password:
+                if config and 'instagram' in config:
+                    username_auth = config['instagram']['username']
+                    password = config['instagram']['password']
+                else:
+                    yield f"data: {json.dumps({'error': 'Instagram 인증 정보가 없습니다. 환경변수를 설정해주세요.'})}\n\n"
+                    return
             
             # 크롤러 초기화
             crawler = InstagramCrawler(
