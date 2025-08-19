@@ -202,3 +202,29 @@ def save_user_data(username: str, data_type: str, data: any):
 
 # 데이터베이스 초기화
 init_database()
+
+# 기본 관리자 계정 생성 (없을 경우에만)
+def create_default_admin():
+    """기본 관리자 계정 생성"""
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+        
+        # jsky9292 계정이 있는지 확인
+        cursor.execute("SELECT id FROM users WHERE username = ?", ('jsky9292',))
+        if not cursor.fetchone():
+            # 없으면 생성
+            hashed_password = get_password_hash('admin1234')  # 기본 비밀번호
+            cursor.execute('''
+                INSERT INTO users (email, username, full_name, hashed_password, is_active)
+                VALUES (?, ?, ?, ?, ?)
+            ''', ('jsky9292@gmail.com', 'jsky9292', '관리자', hashed_password, 1))
+            conn.commit()
+            print("기본 관리자 계정 생성됨: jsky9292 / admin1234")
+        
+        conn.close()
+    except Exception as e:
+        print(f"관리자 계정 생성 실패: {e}")
+
+# 서버 시작 시 기본 관리자 생성
+create_default_admin()
