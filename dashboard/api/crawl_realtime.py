@@ -892,6 +892,47 @@ async def get_me(current_user: dict = Depends(get_current_user)):
         'created_at': current_user['created_at']
     }
 
+@app.get("/admin/users")
+async def get_all_users(current_user: dict = Depends(get_current_user)):
+    """전체 회원 목록 조회 (관리자 전용)"""
+    # 관리자 권한 확인
+    if current_user['username'] != 'jsky9292':
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="관리자 권한이 필요합니다"
+        )
+    
+    # SQLite 연결
+    import sqlite3
+    conn = sqlite3.connect(Path(__file__).parent / "users.db")
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+    
+    # 모든 사용자 조회
+    cursor.execute("""
+        SELECT id, username, email, full_name, created_at, last_login, usage_count, is_active
+        FROM users
+        ORDER BY created_at DESC
+    """)
+    
+    users = [dict(row) for row in cursor.fetchall()]
+    conn.close()
+    
+    # 통계 계산
+    total_users = len(users)
+    active_users = sum(1 for u in users if u.get('is_active', 1))
+    total_usage = sum(u.get('usage_count', 0) for u in users)
+    
+    return {
+        "users": users,
+        "stats": {
+            "total_users": total_users,
+            "active_users": active_users,
+            "total_usage": total_usage,
+            "avg_usage": total_usage / total_users if total_users > 0 else 0
+        }
+    }
+
 @app.post("/auth/save-search")
 async def save_search(
     search_data: dict,

@@ -4,8 +4,9 @@ import React, { useState, useEffect } from 'react'
 import InfluencerDashboard from './InfluencerDashboard'
 import CrawlingSearch from './CrawlingSearch'
 import ViralContentAnalyzer from './ViralContentAnalyzer'
+import AdminDashboard from './AdminDashboard'
 import AuthModal from './AuthModal'
-import { TrendingUp, Search, BarChart, User, LogOut } from 'lucide-react'
+import { TrendingUp, Search, BarChart, User, LogOut, Shield } from 'lucide-react'
 
 interface InfluencerData {
   username: string
@@ -23,7 +24,7 @@ interface InfluencerData {
 
 const EnhancedInfluencerDashboard: React.FC = () => {
   const [crawledData, setCrawledData] = useState<InfluencerData[]>([])
-  const [activeTab, setActiveTab] = useState<'search' | 'viral'>('search')
+  const [activeTab, setActiveTab] = useState<'search' | 'viral' | 'admin'>('search')
   const [showAuthModal, setShowAuthModal] = useState(false)
   const [currentUser, setCurrentUser] = useState<any>(null)
 
@@ -92,6 +93,20 @@ const EnhancedInfluencerDashboard: React.FC = () => {
             <div className="flex items-center gap-4">
               {currentUser ? (
                 <div className="flex items-center gap-4">
+                  {/* 관리자 버튼 (jsky9292만 표시) */}
+                  {currentUser.username === 'jsky9292' && (
+                    <button
+                      onClick={() => setActiveTab('admin')}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all ${
+                        activeTab === 'admin'
+                          ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg'
+                          : 'text-purple-600 hover:bg-purple-50'
+                      }`}
+                    >
+                      <Shield className="w-5 h-5" />
+                      관리자
+                    </button>
+                  )}
                   <div className="text-sm">
                     <p className="font-semibold">{currentUser.username}</p>
                     <p className="text-gray-500">사용 횟수: {currentUser.usage_count || 0}</p>
@@ -131,12 +146,15 @@ const EnhancedInfluencerDashboard: React.FC = () => {
             <InfluencerDashboard crawledData={crawledData} />
           </div>
         </>
-      ) : (
+      ) : activeTab === 'viral' ? (
         /* 바이럴 콘텐츠 분석 섹션 */
         <div className="py-12">
           <ViralContentAnalyzer />
         </div>
-      )}
+      ) : activeTab === 'admin' && currentUser?.username === 'jsky9292' ? (
+        /* 관리자 대시보드 */
+        <AdminDashboard />
+      ) : null}
 
       {/* 인증 모달 */}
       <AuthModal 
