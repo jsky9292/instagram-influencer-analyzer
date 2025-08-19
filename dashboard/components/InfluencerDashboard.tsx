@@ -426,7 +426,7 @@ const InfluencerDashboard: React.FC<InfluencerDashboardProps> = ({ crawledData =
                       <td className="py-4 px-2">
                         <div className="flex items-center space-x-2">
                           <span className="text-lg font-semibold">
-                            {formatPercentage(influencer.engagement_rate || influencer.engagement || 0)}
+                            {formatPercentage(influencer.engagement_rate || 0)}
                           </span>
                           <Heart className="w-4 h-4 text-red-500" />
                         </div>
@@ -437,7 +437,7 @@ const InfluencerDashboard: React.FC<InfluencerDashboardProps> = ({ crawledData =
                         </span>
                       </td>
                       <td className="py-4 px-2">
-                        {(influencer.is_verified || influencer.verified) ? (
+                        {influencer.is_verified ? (
                           <Award className="w-6 h-6 text-yellow-500" />
                         ) : (
                           <span className="text-gray-400">-</span>
