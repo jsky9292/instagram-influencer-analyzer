@@ -876,7 +876,8 @@ async def login(form_data: UserLogin):
             'username': user['username'],
             'email': user['email'],
             'full_name': user['full_name'],
-            'usage_count': user['usage_count']
+            'usage_count': user['usage_count'],
+            'is_admin': user['username'] == 'jsky9292'  # 관리자 확인
         }
     )
 

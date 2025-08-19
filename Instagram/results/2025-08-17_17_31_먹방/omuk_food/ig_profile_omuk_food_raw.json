@@ -1,0 +1,115 @@
+{
+  "data": {
+    "user": {
+      "ai_agent_type": null,
+      "biography": "대한민국 No.1 Food Channel 오늘 뭐 먹지?\n팔로우하시고 엄선된 신상/맛집/레시피 정보 받아보세요🙏🏻\n👇티도씨 아이스티 60% 할인 중👇",
+      "bio_links": [
+        {
+          "title": "제휴문의 ▶️",
+          "lynx_url": "https://l.instagram.com/?u=https%3A%2F%2Fpf.kakao.com%2F_xctVxlxj%3Ffbclid%3DPAZXh0bgNhZW0CMTEAAaeq5xyWf_cir-n04CyeheuXU1tL3G58pO2OfF0_QykNGTooZeigB0KkJRmJJw_aem_momq3iilajZuNyLKFSFNcg&e=AT1sQfXUGgQk-oWXpt2S3TJJSNQukskObeqnmPM6LIXwDTlD-HIM_WJUc0QStt2HMomntmmD12C7Nvjv7XgDrYxkrlElHgTWU4xZN1g",
+          "url": "https://pf.kakao.com/_xctVxlxj",
+          "link_type": "external"
+        },
+        {
+          "title": "",
+          "lynx_url": "https://l.instagram.com/?u=https%3A%2F%2Fpage.cookatmarket.com%2Fmr0wbw%3Ffbclid%3DPAZXh0bgNhZW0CMTEAAafQn3EUDiFoJ8jxo4xNqzU5H2lVhgUDstljEr9kSB4eO9V7cr5lat--BtDmQA_aem_7N0wgrvWTHjZiWNxSzb1Uw&e=AT2mDiM9S7X1qWxgHM-ibmEd7k3wVolvD1CXpzoEk87s3vRxYpHg454JIJvijzONznm5QoE_fr6EFwiiOY87w6X-MlrFhdaoXof4Rqs",
+          "url": "https://page.cookatmarket.com/mr0wbw",
+          "link_type": "external"
+        }
+      ],
+      "fb_profile_biolink": null,
+      "biography_with_entities": {
+        "raw_text": "대한민국 No.1 Food Channel 오늘 뭐 먹지?\n팔로우하시고 엄선된 신상/맛집/레시피 정보 받아보세요🙏🏻\n👇티도씨 아이스티 60% 할인 중👇",
+        "entities": []
+      },
+      "blocked_by_viewer": false,
+      "restricted_by_viewer": false,
+      "country_block": false,
+      "eimu_id": "115154599881717",
+      "external_url": "https://pf.kakao.com/_xctVxlxj",
+      "external_url_linkshimmed": "https://l.instagram.com/?u=https%3A%2F%2Fpf.kakao.com%2F_xctVxlxj%3Ffbclid%3DPAZXh0bgNhZW0CMTEAAaeAc3L8azLpAeFEwKvDUAz-aKdowyWVNPDpuVQkjEFaPauNUKsQkZtfWD4IYg_aem_CsKTMV42jUKry4yO_hRmzg&e=AT0fzc0sU0wq2Sg1CP8Ib_iKm8rMlXekg9zw98DaLRTi4X7URM7x5g24PTR5fHgDAgRLL5SFESjCfri3EFulp1uIBiS1QgswGtvFCcs",
+      "edge_followed_by": {
+        "count": 1372088
+      },
+      "fbid": "17841400384562236",
+      "followed_by_viewer": false,
+      "edge_follow": {
+        "count": 17
+      },
+      "follows_viewer": false,
+      "full_name": "오늘뭐먹지?",
+      "group_metadata": null,
+      "has_ar_effects": false,
+      "has_clips": true,
+      "has_guides": false,
+      "has_chaining": true,
+      "has_channel": false,
+      "has_blocked_viewer": false,
+      "highlight_reel_count": 12,
+      "has_requested_viewer": false,
+      "hide_like_and_view_counts": false,
+      "id": "1423116818",
+      "is_business_account": false,
+      "is_professional_account": true,
+      "is_supervision_enabled": false,
+      "is_guardian_of_viewer": false,
+      "is_supervised_by_viewer": false,
+      "is_supervised_user": false,
+      "is_embeds_disabled": false,
+      "is_joined_recently": false,
+      "guardian_id": null,
+      "business_address_json": null,
+      "business_contact_method": "UNKNOWN",
+      "business_email": null,
+      "business_phone_number": null,
+      "business_category_name": null,
+      "overall_category_name": null,
+      "category_enum": null,
+      "category_name": null,
+      "is_private": false,
+      "is_verified": true,
+      "is_verified_by_mv4b": false,
+      "is_regulated_c18": false,
+      "edge_mutual_followed_by": {
+        "count": 3,
+        "edges": [
+          {
+            "node": {
+              "username": "dayeating.kr"
+            }
+          },
+          {
+            "node": {
+              "username": "matdori.world"
+            }
+          },
+          {
+            "node": {
+              "username": "lulu__mignon"
+            }
+          }
+        ]
+      },
+      "pinned_channels_list_count": 0,
+      "profile_pic_url": "https://scontent-ssn1-1.cdninstagram.com/v/t51.2885-19/107434464_416262689342707_4930522678838115062_n.jpg?stp=dst-jpg_e0_s150x150_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLmRqYW5nby41MDAuYzIifQ&_nc_ht=scontent-ssn1-1.cdninstagram.com&_nc_cat=1&_nc_oc=Q6cZ2QG4_us8CP8yPrrfmtTUSn_8cHbFo4JvhmkxQ6Xx6rkrZfI3M3X4IkhQvOGfTjNJ8BA&_nc_ohc=EKHotrKPOAIQ7kNvwHdAjel&_nc_gid=7wAk2ITP1zRQIRxOq-H6yA&edm=AOQ1c0wBAAAA&ccb=7-5&oh=00_AfW_nTQxi9YO_GSAEd1S5DwKmp1qRlCcmKbvXFb2Oqs-Zw&oe=68A7509D&_nc_sid=8b3546",
+      "profile_pic_url_hd": "https://scontent-ssn1-1.cdninstagram.com/v/t51.2885-19/107434464_416262689342707_4930522678838115062_n.jpg?stp=dst-jpg_s320x320_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLmRqYW5nby41MDAuYzIifQ&_nc_ht=scontent-ssn1-1.cdninstagram.com&_nc_cat=1&_nc_oc=Q6cZ2QG4_us8CP8yPrrfmtTUSn_8cHbFo4JvhmkxQ6Xx6rkrZfI3M3X4IkhQvOGfTjNJ8BA&_nc_ohc=EKHotrKPOAIQ7kNvwHdAjel&_nc_gid=7wAk2ITP1zRQIRxOq-H6yA&edm=AOQ1c0wBAAAA&ccb=7-5&oh=00_AfVcSlrvWM0wKSAUZCKChw1nTQ6s3Ajn-9iy4TGPrWxCLg&oe=68A7509D&_nc_sid=8b3546",
+      "requested_by_viewer": false,
+      "should_show_category": true,
+      "should_show_public_contacts": true,
+      "show_account_transparency_details": true,
+      "transparency_label": null,
+      "transparency_product": null,
+      "username": "omuk_food",
+      "pronouns": [],
+      "edge_owner_to_timeline_media": {
+        "count": 21588,
+        "page_info": {
+          "has_next_page": true,
+          "end_cursor": ""
+        },
+        "edges": []
+      }
+    }
+  },
+  "status": "ok"
+}
