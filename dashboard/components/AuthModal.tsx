@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
+import { API_ENDPOINTS } from '@/lib/api'
 import { X, User, Mail, Lock, Eye, EyeOff } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -29,12 +30,12 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess }) => 
     setLoading(true)
 
     try {
-      const endpoint = mode === 'login' ? '/auth/login' : '/auth/signup'
+      const endpoint = mode === 'login' ? API_ENDPOINTS.authLogin : API_ENDPOINTS.authSignup
       const body = mode === 'login' 
         ? { username: formData.username, password: formData.password }
         : formData
 
-      const response = await fetch(`http://localhost:8000${endpoint}`, {
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)

@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
+import { API_URL } from '@/lib/api'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { X, Instagram, TrendingUp, Heart, MessageCircle, Eye, Music, Calendar, Copy, ExternalLink } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -76,7 +77,7 @@ const InfluencerDetail: React.FC<InfluencerDetailProps> = ({ influencer, isOpen,
     
     setIsLoading(true)
     try {
-      const response = await fetch(`http://localhost:8000/influencer/${influencer.username}/posts`)
+      const response = await fetch(`${API_URL}/influencer/${influencer.username}/posts`)
       if (response.ok) {
         const data = await response.json()
         setPostsData(data.posts || [])

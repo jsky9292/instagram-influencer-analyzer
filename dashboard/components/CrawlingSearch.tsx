@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
+import { API_ENDPOINTS } from '@/lib/api'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Search, Loader2, Instagram, Users, TrendingUp, AlertCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -61,7 +62,8 @@ const CrawlingSearch: React.FC<CrawlingSearchProps> = ({ onCrawlingResult }) => 
             target_country: targetCountry
           }
       
-      const response = await fetch(`http://localhost:8000${endpoint}`, {
+      const apiEndpoint = searchMode === 'user' ? API_ENDPOINTS.analyzeUser : API_ENDPOINTS.crawl
+      const response = await fetch(apiEndpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

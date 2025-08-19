@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
+import { API_ENDPOINTS } from '@/lib/api'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { TrendingUp, Lightbulb, Video, Edit3, Target, Clock, Hash, Zap, Copy, ChevronDown, ChevronUp } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -78,7 +79,7 @@ const ViralContentAnalyzer: React.FC = () => {
     setAnalysis(null)
 
     try {
-      const response = await fetch('http://localhost:8000/analyze/viral-content', {
+      const response = await fetch(API_ENDPOINTS.analyzeViral, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
