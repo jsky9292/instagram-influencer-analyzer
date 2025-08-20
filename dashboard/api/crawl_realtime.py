@@ -3,7 +3,7 @@
 FastAPI 기반 Instagram 실시간 크롤링 API 서버
 """
 
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, HTTPException, Depends, Header
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse, FileResponse
 import uvicorn
@@ -1091,12 +1091,21 @@ async def get_viral_patterns(category: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/api/gemini/analyze")
-async def gemini_analysis_endpoint(request: dict):
+async def gemini_analysis_endpoint(request: dict, x_gemini_api_key: str = Header(None)):
     """Gemini AI를 활용한 현실적인 인플루언서 분석"""
-    if not gemini_analyzer:
+    
+    # API 키가 헤더에서 제공된 경우 해당 키로 새 analyzer 생성
+    if x_gemini_api_key:
+        try:
+            analyzer = GeminiAnalyzer(api_key=x_gemini_api_key)
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=f"잘못된 Gemini API 키: {str(e)}")
+    elif gemini_analyzer:
+        analyzer = gemini_analyzer
+    else:
         raise HTTPException(
             status_code=503, 
-            detail="Gemini 분석기가 초기화되지 않았습니다. GEMINI_API_KEY를 확인해주세요."
+            detail="Gemini API 키가 필요합니다. 설정에서 API 키를 입력해주세요."
         )
     
     try:
@@ -1120,7 +1129,7 @@ async def gemini_analysis_endpoint(request: dict):
         )
         
         # Gemini 분석 수행
-        analysis_result = await gemini_analyzer.analyze_influencer_realistically(profile)
+        analysis_result = await analyzer.analyze_influencer_realistically(profile)
         
         return {
             'success': True,
@@ -1132,19 +1141,28 @@ async def gemini_analysis_endpoint(request: dict):
         raise HTTPException(status_code=500, detail=f"Gemini 분석 실패: {str(e)}")
 
 @app.post("/api/gemini/market-analysis")
-async def gemini_market_analysis_endpoint(request: dict):
+async def gemini_market_analysis_endpoint(request: dict, x_gemini_api_key: str = Header(None)):
     """Gemini AI를 활용한 시장 분석"""
-    if not gemini_analyzer:
+    
+    # API 키가 헤더에서 제공된 경우 해당 키로 새 analyzer 생성
+    if x_gemini_api_key:
+        try:
+            analyzer = GeminiAnalyzer(api_key=x_gemini_api_key)
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=f"잘못된 Gemini API 키: {str(e)}")
+    elif gemini_analyzer:
+        analyzer = gemini_analyzer
+    else:
         raise HTTPException(
             status_code=503, 
-            detail="Gemini 분석기가 초기화되지 않았습니다. GEMINI_API_KEY를 확인해주세요."
+            detail="Gemini API 키가 필요합니다. 설정에서 API 키를 입력해주세요."
         )
     
     try:
         category = request.get('category', '뷰티')
         
         # 시장 컨텍스트 분석
-        market_analysis = await gemini_analyzer._get_market_context(category)
+        market_analysis = await analyzer._get_market_context(category)
         
         return {
             'success': True,
@@ -1166,12 +1184,21 @@ async def gemini_market_analysis_endpoint(request: dict):
         raise HTTPException(status_code=500, detail=f"시장 분석 실패: {str(e)}")
 
 @app.post("/api/gemini/roi-predict")
-async def gemini_roi_prediction_endpoint(request: dict):
+async def gemini_roi_prediction_endpoint(request: dict, x_gemini_api_key: str = Header(None)):
     """Gemini AI를 활용한 ROI 예측"""
-    if not gemini_analyzer:
+    
+    # API 키가 헤더에서 제공된 경우 해당 키로 새 analyzer 생성
+    if x_gemini_api_key:
+        try:
+            analyzer = GeminiAnalyzer(api_key=x_gemini_api_key)
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=f"잘못된 Gemini API 키: {str(e)}")
+    elif gemini_analyzer:
+        analyzer = gemini_analyzer
+    else:
         raise HTTPException(
             status_code=503, 
-            detail="Gemini 분석기가 초기화되지 않았습니다. GEMINI_API_KEY를 확인해주세요."
+            detail="Gemini API 키가 필요합니다. 설정에서 API 키를 입력해주세요."
         )
     
     try:
@@ -1192,13 +1219,13 @@ async def gemini_roi_prediction_endpoint(request: dict):
         )
         
         # 시장 컨텍스트
-        market_context = await gemini_analyzer._get_market_context(profile.category)
+        market_context = await analyzer._get_market_context(profile.category)
         
         # 성과 예측
-        performance_prediction = await gemini_analyzer._predict_campaign_performance(profile, market_context)
+        performance_prediction = await analyzer._predict_campaign_performance(profile, market_context)
         
         # 비용 대비 효과 분석
-        cost_benefit = await gemini_analyzer._analyze_cost_benefit(profile, performance_prediction)
+        cost_benefit = await analyzer._analyze_cost_benefit(profile, performance_prediction)
         
         # ROI 계산
         expected_roi = performance_prediction.get('roi_prediction', {}).get('expected', 2.0)

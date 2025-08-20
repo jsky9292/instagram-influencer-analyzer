@@ -115,10 +115,17 @@ export default function GeminiAnalyzer() {
         demographics: {}
       }
 
+      // 로컬 스토리지에서 API 키 가져오기
+      const geminiKey = localStorage.getItem('gemini_api_key')
+      if (!geminiKey) {
+        throw new Error('Gemini API 키가 설정되지 않았습니다. 설정 페이지에서 API 키를 입력해주세요.')
+      }
+
       const response = await fetch(`${API_URL}/api/gemini/analyze`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'X-Gemini-API-Key': geminiKey,
         },
         body: JSON.stringify(requestData)
       })

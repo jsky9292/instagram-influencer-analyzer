@@ -5,9 +5,11 @@ import InfluencerDashboard from './InfluencerDashboard'
 import CrawlingSearch from './CrawlingSearch'
 import ViralContentAnalyzer from './ViralContentAnalyzer'
 import ViralAnalyzer from './ViralAnalyzer'
+import GeminiAnalyzer from './GeminiAnalyzer'
+import Settings from './Settings'
 import AdminDashboard from './AdminDashboard'
 import AuthModal from './AuthModal'
-import { TrendingUp, Search, BarChart, User, LogOut, Shield, Brain } from 'lucide-react'
+import { TrendingUp, Search, BarChart, User, LogOut, Shield, Brain, Settings as SettingsIcon } from 'lucide-react'
 
 interface InfluencerData {
   username: string
@@ -25,7 +27,7 @@ interface InfluencerData {
 
 const EnhancedInfluencerDashboard: React.FC = () => {
   const [crawledData, setCrawledData] = useState<InfluencerData[]>([])
-  const [activeTab, setActiveTab] = useState<'search' | 'viral' | 'ai' | 'admin'>('search')
+  const [activeTab, setActiveTab] = useState<'search' | 'viral' | 'ai' | 'gemini' | 'settings' | 'admin'>('search')
   const [showAuthModal, setShowAuthModal] = useState(false)
   const [currentUser, setCurrentUser] = useState<any>(null)
 
@@ -99,12 +101,36 @@ const EnhancedInfluencerDashboard: React.FC = () => {
                 <Brain className="w-5 h-5" />
                 AI 바이럴 분석
               </button>
+              <button
+                onClick={() => setActiveTab('gemini')}
+                className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all ${
+                  activeTab === 'gemini'
+                    ? 'bg-gradient-to-r from-green-500 to-teal-500 text-white shadow-lg'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                }`}
+              >
+                <Brain className="w-5 h-5" />
+                Gemini AI 분석
+              </button>
             </div>
             
             {/* 사용자 메뉴 */}
             <div className="flex items-center gap-4">
               {currentUser ? (
                 <div className="flex items-center gap-4">
+                  {/* 설정 버튼 */}
+                  <button
+                    onClick={() => setActiveTab('settings')}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all ${
+                      activeTab === 'settings'
+                        ? 'bg-gradient-to-r from-gray-600 to-gray-700 text-white shadow-lg'
+                        : 'text-gray-600 hover:bg-gray-50'
+                    }`}
+                  >
+                    <SettingsIcon className="w-5 h-5" />
+                    설정
+                  </button>
+                  
                   {/* 관리자 버튼 (jsky9292만 표시) */}
                   {currentUser.username === 'jsky9292' && (
                     <button
@@ -167,6 +193,18 @@ const EnhancedInfluencerDashboard: React.FC = () => {
         /* AI 바이럴 분석 섹션 */
         <div className="py-12">
           <ViralAnalyzer />
+        </div>
+      ) : activeTab === 'gemini' ? (
+        /* Gemini AI 분석 섹션 */
+        <div className="py-12">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <GeminiAnalyzer />
+          </div>
+        </div>
+      ) : activeTab === 'settings' ? (
+        /* 설정 섹션 */
+        <div className="py-12">
+          <Settings />
         </div>
       ) : activeTab === 'admin' && currentUser?.username === 'jsky9292' ? (
         /* 관리자 대시보드 */

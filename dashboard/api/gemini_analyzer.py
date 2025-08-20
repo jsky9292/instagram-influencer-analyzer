@@ -33,11 +33,11 @@ class MarketAnalysis:
     competitor_activity: List[Dict]
 
 class GeminiAnalyzer:
-    def __init__(self):
+    def __init__(self, api_key: str = None):
         # Gemini API 설정
-        self.api_key = os.getenv('GEMINI_API_KEY')
+        self.api_key = api_key or os.getenv('GEMINI_API_KEY')
         if not self.api_key:
-            raise ValueError("GEMINI_API_KEY 환경변수가 설정되지 않았습니다")
+            raise ValueError("GEMINI_API_KEY가 설정되지 않았습니다")
         
         genai.configure(api_key=self.api_key)
         self.model = genai.GenerativeModel('gemini-1.5-pro')
