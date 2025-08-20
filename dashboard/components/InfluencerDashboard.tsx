@@ -137,7 +137,20 @@ const InfluencerDashboard: React.FC<InfluencerDashboardProps> = ({ crawledData =
   const currentData = crawledData.length > 0 ? crawledData : influencerData
   
   const totalFollowers = currentData.reduce((sum, inf) => sum + inf.followers, 0)
-  const avgEngagement = currentData.reduce((sum, inf) => sum + (inf.engagement_rate || 0), 0) / currentData.length
+  
+  // 중간값(Median) 참여율 계산 - 극단값의 영향을 줄임
+  const sortedEngagements = currentData
+    .map(inf => inf.engagement_rate || 0)
+    .sort((a, b) => a - b)
+  const medianEngagement = currentData.length > 0
+    ? sortedEngagements[Math.floor(sortedEngagements.length / 2)]
+    : 0
+  
+  // 평균 게시물 수 계산
+  const avgPosts = currentData.length > 0
+    ? Math.round(currentData.reduce((sum, inf) => sum + (inf.posts || 0), 0) / currentData.length)
+    : 0
+  
   const verifiedCount = currentData.filter(inf => inf.is_verified).length
 
   // 동적으로 차트 데이터 생성
@@ -223,9 +236,9 @@ const InfluencerDashboard: React.FC<InfluencerDashboardProps> = ({ crawledData =
             gradient="gradient-secondary"
           />
           <MetricCard
-            title="평균 참여율"
-            value={formatPercentage(avgEngagement)}
-            change="+8%"
+            title="평균 게시물"
+            value={avgPosts.toLocaleString() + "개"}
+            change="+15%"
             icon={<Heart className="w-8 h-8" />}
             trend="up"
             gradient="gradient-success"
@@ -425,9 +438,25 @@ const InfluencerDashboard: React.FC<InfluencerDashboardProps> = ({ crawledData =
                       </td>
                       <td className="py-4 px-2">
                         <div className="flex items-center space-x-2">
-                          <span className="text-lg font-semibold">
+                          <span className={cn(
+                            "text-lg font-semibold",
+                            influencer.engagement_rate > 10 && "text-red-600",
+                            influencer.engagement_rate > 5 && influencer.engagement_rate <= 10 && "text-orange-600",
+                            influencer.engagement_rate > 2 && influencer.engagement_rate <= 5 && "text-yellow-600",
+                            influencer.engagement_rate <= 2 && "text-gray-600"
+                          )}>
                             {formatPercentage(influencer.engagement_rate || 0)}
                           </span>
+                          {influencer.engagement_rate > 10 && (
+                            <span className="px-2 py-1 bg-red-100 text-red-800 rounded text-xs font-bold">
+                              🔥 매우 높음
+                            </span>
+                          )}
+                          {influencer.engagement_rate > 5 && influencer.engagement_rate <= 10 && (
+                            <span className="px-2 py-1 bg-orange-100 text-orange-800 rounded text-xs font-bold">
+                              높음
+                            </span>
+                          )}
                           <Heart className="w-4 h-4 text-red-500" />
                         </div>
                       </td>

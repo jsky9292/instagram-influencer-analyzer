@@ -4,9 +4,10 @@ import React, { useState, useEffect } from 'react'
 import InfluencerDashboard from './InfluencerDashboard'
 import CrawlingSearch from './CrawlingSearch'
 import ViralContentAnalyzer from './ViralContentAnalyzer'
+import ViralAnalyzer from './ViralAnalyzer'
 import AdminDashboard from './AdminDashboard'
 import AuthModal from './AuthModal'
-import { TrendingUp, Search, BarChart, User, LogOut, Shield } from 'lucide-react'
+import { TrendingUp, Search, BarChart, User, LogOut, Shield, Brain } from 'lucide-react'
 
 interface InfluencerData {
   username: string
@@ -24,7 +25,7 @@ interface InfluencerData {
 
 const EnhancedInfluencerDashboard: React.FC = () => {
   const [crawledData, setCrawledData] = useState<InfluencerData[]>([])
-  const [activeTab, setActiveTab] = useState<'search' | 'viral' | 'admin'>('search')
+  const [activeTab, setActiveTab] = useState<'search' | 'viral' | 'ai' | 'admin'>('search')
   const [showAuthModal, setShowAuthModal] = useState(false)
   const [currentUser, setCurrentUser] = useState<any>(null)
 
@@ -86,6 +87,17 @@ const EnhancedInfluencerDashboard: React.FC = () => {
               >
                 <TrendingUp className="w-5 h-5" />
                 바이럴 콘텐츠 분석
+              </button>
+              <button
+                onClick={() => setActiveTab('ai')}
+                className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all ${
+                  activeTab === 'ai'
+                    ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                }`}
+              >
+                <Brain className="w-5 h-5" />
+                AI 바이럴 분석
               </button>
             </div>
             
@@ -150,6 +162,11 @@ const EnhancedInfluencerDashboard: React.FC = () => {
         /* 바이럴 콘텐츠 분석 섹션 */
         <div className="py-12">
           <ViralContentAnalyzer />
+        </div>
+      ) : activeTab === 'ai' ? (
+        /* AI 바이럴 분석 섹션 */
+        <div className="py-12">
+          <ViralAnalyzer />
         </div>
       ) : activeTab === 'admin' && currentUser?.username === 'jsky9292' ? (
         /* 관리자 대시보드 */

@@ -4,13 +4,13 @@
   publish = ".next"
 
 [build.environment]
-  NEXT_PUBLIC_API_URL = "http://localhost:8000"
+  NEXT_PUBLIC_API_URL = "https://instagram-analyzer-api.onrender.com"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
 [[redirects]]
   from = "/api/*"
-  to = "http://localhost:8000/:splat"
+  to = "https://instagram-analyzer-api.onrender.com/:splat"
   status = 200
   force = true

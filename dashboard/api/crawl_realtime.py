@@ -49,7 +49,12 @@ app = FastAPI(title="Instagram Influencer Realtime Crawling API")
 # CORS 설정
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_origins=[
+        "http://localhost:3000", 
+        "http://127.0.0.1:3000",
+        "https://instar9292.netlify.app",
+        "https://*.netlify.app"  # 모든 Netlify 서브도메인 허용
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -457,6 +462,14 @@ async def get_influencer_posts(username: str):
     except Exception as e:
         print(f"Error fetching posts: {e}")
         return {"username": username, "posts": []}
+
+# 바이럴 분석 엔진 임포트
+from viral_analyzer import (
+    ViralContentAnalyzer,
+    analyze_viral_content as analyze_content,
+    generate_ai_content_ideas,
+    predict_content_performance
+)
 
 @app.post("/analyze/viral-content")
 async def analyze_viral_content(request: dict):
@@ -950,6 +963,124 @@ async def save_influencer(
     """인플루언서 저장"""
     save_user_data(current_user['username'], 'influencer', influencer_data)
     return {"message": "인플루언서가 저장되었습니다."}
+
+@app.post("/api/viral/analyze")
+async def viral_analysis_endpoint(request: dict):
+    """바이럴 콘텐츠 심층 분석"""
+    try:
+        analyzer = ViralContentAnalyzer()
+        
+        # 콘텐츠 데이터 구성
+        content_data = {
+            'type': request.get('type', 'post'),
+            'caption': request.get('caption', ''),
+            'hashtags': request.get('hashtags', []),
+            'likes': request.get('likes', 0),
+            'comments': request.get('comments', 0),
+            'shares': request.get('shares', 0),
+            'saves': request.get('saves', 0),
+            'timestamp': request.get('timestamp', datetime.now().isoformat())
+        }
+        
+        # 바이럴 분석 수행
+        analysis = analyzer.analyze_content(content_data)
+        
+        return {
+            'success': True,
+            'analysis': {
+                'viral_probability': round(analysis.viral_probability * 100, 1),
+                'success_factors': analysis.success_factors,
+                'improvement_suggestions': analysis.improvement_suggestions,
+                'hashtag_strategy': analysis.hashtag_strategy,
+                'caption_analysis': analysis.caption_analysis,
+                'engagement_patterns': analysis.engagement_patterns,
+                'visual_elements': analysis.visual_elements,
+                'posting_time': analysis.posting_time
+            }
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/content/ideas")
+async def generate_content_ideas_endpoint(request: dict):
+    """AI 기반 콘텐츠 아이디어 생성"""
+    try:
+        category = request.get('category', '먹방')
+        user_data = request.get('user_data', {})
+        
+        ideas = generate_ai_content_ideas(category, user_data)
+        
+        return {
+            'success': True,
+            'category': category,
+            'ideas': ideas
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/content/predict")
+async def predict_performance_endpoint(request: dict):
+    """콘텐츠 성과 예측"""
+    try:
+        content_plan = {
+            'category': request.get('category', '기타'),
+            'format': request.get('format', 'post'),
+            'posting_time': request.get('posting_time'),
+            'hashtags': request.get('hashtags', []),
+            'follower_count': request.get('follower_count', 10000)
+        }
+        
+        prediction = predict_content_performance(content_plan)
+        
+        return {
+            'success': True,
+            'prediction': prediction
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/trending/hashtags")
+async def get_trending_hashtags(category: str = None):
+    """트렌딩 해시태그 조회"""
+    try:
+        analyzer = ViralContentAnalyzer()
+        
+        if category:
+            hashtags = analyzer.hashtag_database['trending'].get(category, [])
+        else:
+            all_hashtags = []
+            for cat_hashtags in analyzer.hashtag_database['trending'].values():
+                all_hashtags.extend(cat_hashtags)
+            hashtags = list(set(all_hashtags))[:30]
+        
+        return {
+            'success': True,
+            'category': category,
+            'hashtags': hashtags,
+            'power_tags': analyzer.hashtag_database['power_tags']['universal'][:10]
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/patterns/{category}")
+async def get_viral_patterns(category: str):
+    """카테고리별 바이럴 패턴 조회"""
+    try:
+        analyzer = ViralContentAnalyzer()
+        pattern = analyzer.viral_patterns.get(category)
+        
+        if not pattern:
+            raise HTTPException(status_code=404, detail=f"카테고리 '{category}'를 찾을 수 없습니다")
+        
+        return {
+            'success': True,
+            'category': category,
+            'pattern': pattern
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/health")
 async def health_check():
