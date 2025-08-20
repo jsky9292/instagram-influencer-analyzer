@@ -35,6 +35,14 @@ try:
 except ImportError:
     print("Instagram 크롤러를 찾을 수 없습니다. 경로를 확인해주세요.")
 
+# Gemini 분석기 추가
+try:
+    from gemini_analyzer import GeminiAnalyzer, InfluencerProfile
+    gemini_analyzer = GeminiAnalyzer()
+except ImportError as e:
+    print(f"Gemini 분석기를 로드할 수 없습니다: {e}")
+    gemini_analyzer = None
+
 # Config 파일 로드
 def load_config():
     if CONFIG_PATH.exists():
@@ -1081,6 +1089,161 @@ async def get_viral_patterns(category: str):
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/gemini/analyze")
+async def gemini_analysis_endpoint(request: dict):
+    """Gemini AI를 활용한 현실적인 인플루언서 분석"""
+    if not gemini_analyzer:
+        raise HTTPException(
+            status_code=503, 
+            detail="Gemini 분석기가 초기화되지 않았습니다. GEMINI_API_KEY를 확인해주세요."
+        )
+    
+    try:
+        # 요청 데이터 파싱
+        username = request.get('username', '')
+        followers = request.get('followers', 0)
+        engagement_rate = request.get('engagement_rate', 0.0)
+        category = request.get('category', '기타')
+        recent_posts = request.get('recent_posts', [])
+        brand_collaborations = request.get('brand_collaborations', [])
+        
+        # InfluencerProfile 객체 생성
+        profile = InfluencerProfile(
+            username=username,
+            followers=followers,
+            engagement_rate=engagement_rate,
+            category=category,
+            recent_posts=recent_posts,
+            brand_collaborations=brand_collaborations,
+            demographics=request.get('demographics', {})
+        )
+        
+        # Gemini 분석 수행
+        analysis_result = await gemini_analyzer.analyze_influencer_realistically(profile)
+        
+        return {
+            'success': True,
+            'analysis': analysis_result,
+            'powered_by': 'Google Gemini AI'
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Gemini 분석 실패: {str(e)}")
+
+@app.post("/api/gemini/market-analysis")
+async def gemini_market_analysis_endpoint(request: dict):
+    """Gemini AI를 활용한 시장 분석"""
+    if not gemini_analyzer:
+        raise HTTPException(
+            status_code=503, 
+            detail="Gemini 분석기가 초기화되지 않았습니다. GEMINI_API_KEY를 확인해주세요."
+        )
+    
+    try:
+        category = request.get('category', '뷰티')
+        
+        # 시장 컨텍스트 분석
+        market_analysis = await gemini_analyzer._get_market_context(category)
+        
+        return {
+            'success': True,
+            'market_analysis': {
+                'category': category,
+                'trend_score': market_analysis.trend_score,
+                'market_saturation': market_analysis.market_saturation,
+                'seasonal_factors': market_analysis.seasonal_factors,
+                'recommendations': {
+                    'optimal_timing': "지금" if market_analysis.trend_score > 70 else "다음 성수기",
+                    'investment_level': "높음" if market_analysis.market_saturation < 50 else "보통" if market_analysis.market_saturation < 80 else "낮음",
+                    'strategy': "공격적 마케팅" if market_analysis.trend_score > 70 and market_analysis.market_saturation < 60 else "차별화 전략"
+                }
+            },
+            'powered_by': 'Google Gemini AI'
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"시장 분석 실패: {str(e)}")
+
+@app.post("/api/gemini/roi-predict")
+async def gemini_roi_prediction_endpoint(request: dict):
+    """Gemini AI를 활용한 ROI 예측"""
+    if not gemini_analyzer:
+        raise HTTPException(
+            status_code=503, 
+            detail="Gemini 분석기가 초기화되지 않았습니다. GEMINI_API_KEY를 확인해주세요."
+        )
+    
+    try:
+        # 캠페인 데이터
+        campaign_budget = request.get('campaign_budget', 1000000)  # 기본 100만원
+        influencer_data = request.get('influencer_data', {})
+        campaign_type = request.get('campaign_type', '제품 리뷰')
+        
+        # 간단한 프로필 생성
+        profile = InfluencerProfile(
+            username=influencer_data.get('username', ''),
+            followers=influencer_data.get('followers', 50000),
+            engagement_rate=influencer_data.get('engagement_rate', 3.5),
+            category=influencer_data.get('category', '뷰티'),
+            recent_posts=[],
+            brand_collaborations=[],
+            demographics={}
+        )
+        
+        # 시장 컨텍스트
+        market_context = await gemini_analyzer._get_market_context(profile.category)
+        
+        # 성과 예측
+        performance_prediction = await gemini_analyzer._predict_campaign_performance(profile, market_context)
+        
+        # 비용 대비 효과 분석
+        cost_benefit = await gemini_analyzer._analyze_cost_benefit(profile, performance_prediction)
+        
+        # ROI 계산
+        expected_roi = performance_prediction.get('roi_prediction', {}).get('expected', 2.0)
+        expected_return = campaign_budget * expected_roi
+        
+        return {
+            'success': True,
+            'prediction': {
+                'campaign_budget': campaign_budget,
+                'campaign_type': campaign_type,
+                'expected_reach': performance_prediction.get('estimated_reach', {}),
+                'conversion_rates': performance_prediction.get('conversion_rate', {}),
+                'roi_prediction': {
+                    'investment': campaign_budget,
+                    'expected_return': expected_return,
+                    'roi_ratio': expected_roi,
+                    'break_even_point': campaign_budget / expected_roi if expected_roi > 0 else campaign_budget,
+                    'risk_level': "낮음" if expected_roi > 3 else "보통" if expected_roi > 1.5 else "높음"
+                },
+                'cost_analysis': cost_benefit,
+                'market_factors': {
+                    'trend_score': market_context.trend_score,
+                    'saturation_impact': market_context.market_saturation
+                }
+            },
+            'powered_by': 'Google Gemini AI'
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"ROI 예측 실패: {str(e)}")
+
+@app.get("/api/gemini/status")
+async def gemini_status():
+    """Gemini API 상태 확인"""
+    return {
+        'available': gemini_analyzer is not None,
+        'api_key_configured': bool(os.getenv('GEMINI_API_KEY')),
+        'features': [
+            'realistic_influencer_analysis',
+            'market_context_analysis', 
+            'roi_prediction',
+            'brand_compatibility_assessment',
+            'risk_analysis'
+        ] if gemini_analyzer else []
+    }
 
 @app.get("/health")
 async def health_check():
