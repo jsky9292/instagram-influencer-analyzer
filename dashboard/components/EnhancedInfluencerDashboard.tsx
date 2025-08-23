@@ -5,11 +5,13 @@ import InfluencerDashboard from './InfluencerDashboard'
 import CrawlingSearch from './CrawlingSearch'
 import ViralContentAnalyzer from './ViralContentAnalyzer'
 import ViralAnalyzer from './ViralAnalyzer'
-import GeminiAnalyzer from './GeminiAnalyzer'
-import Settings from './Settings'
+import SimpleGeminiAnalyzer from './SimpleGeminiAnalyzer'
+import SimpleSettings from './SimpleSettings'
 import AdminDashboard from './AdminDashboard'
 import AuthModal from './AuthModal'
-import { TrendingUp, Search, BarChart, User, LogOut, Shield, Brain, Settings as SettingsIcon } from 'lucide-react'
+import FollowerCrawler from './FollowerCrawler'
+import ApiConnectionError from './ApiConnectionError'
+import { TrendingUp, Search, BarChart, User, LogOut, Shield, Brain, Settings as SettingsIcon, Users } from 'lucide-react'
 
 interface InfluencerData {
   username: string
@@ -27,7 +29,7 @@ interface InfluencerData {
 
 const EnhancedInfluencerDashboard: React.FC = () => {
   const [crawledData, setCrawledData] = useState<InfluencerData[]>([])
-  const [activeTab, setActiveTab] = useState<'search' | 'viral' | 'ai' | 'gemini' | 'settings' | 'admin'>('search')
+  const [activeTab, setActiveTab] = useState<'search' | 'viral' | 'ai' | 'gemini' | 'settings' | 'admin' | 'followers'>('search')
   const [showAuthModal, setShowAuthModal] = useState(false)
   const [currentUser, setCurrentUser] = useState<any>(null)
 
@@ -63,107 +65,127 @@ const EnhancedInfluencerDashboard: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+      {/* API 연결 체크 */}
+      <ApiConnectionError />
+      
       {/* 탭 네비게이션 */}
       <div className="bg-white shadow-md sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
-            <div className="flex space-x-8">
+        <div className="w-full px-2 sm:px-4">
+          <div className="flex flex-col sm:flex-row justify-between items-center py-2 sm:py-3 gap-2">
+            <div className="flex flex-wrap justify-center sm:justify-start gap-1 sm:gap-2 w-full sm:w-auto">
               <button
                 onClick={() => setActiveTab('search')}
-                className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all ${
+                className={`flex items-center gap-1 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all ${
                   activeTab === 'search'
                     ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
                     : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
                 }`}
               >
-                <Search className="w-5 h-5" />
-                인플루언서 검색 & 분석
+                <Search className="w-3 sm:w-4 h-3 sm:h-4" />
+                <span className="hidden sm:inline">인플루언서</span>
+                <span className="sm:hidden">검색</span>
               </button>
               <button
                 onClick={() => setActiveTab('viral')}
-                className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all ${
+                className={`flex items-center gap-1 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all ${
                   activeTab === 'viral'
                     ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg'
                     : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
                 }`}
               >
-                <TrendingUp className="w-5 h-5" />
-                바이럴 콘텐츠 분석
+                <TrendingUp className="w-3 sm:w-4 h-3 sm:h-4" />
+                <span className="hidden sm:inline">바이럴 콘텐츠</span>
+                <span className="sm:hidden">바이럴</span>
               </button>
               <button
                 onClick={() => setActiveTab('ai')}
-                className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all ${
+                className={`flex items-center gap-1 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all ${
                   activeTab === 'ai'
                     ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg'
                     : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
                 }`}
               >
-                <Brain className="w-5 h-5" />
-                AI 바이럴 분석
+                <Brain className="w-3 sm:w-4 h-3 sm:h-4" />
+                <span className="hidden sm:inline">AI 바이럴</span>
+                <span className="sm:hidden">AI</span>
               </button>
               <button
                 onClick={() => setActiveTab('gemini')}
-                className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all ${
+                className={`flex items-center gap-1 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all ${
                   activeTab === 'gemini'
                     ? 'bg-gradient-to-r from-green-500 to-teal-500 text-white shadow-lg'
                     : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
                 }`}
               >
-                <Brain className="w-5 h-5" />
-                Gemini AI 분석
+                <Brain className="w-3 sm:w-4 h-3 sm:h-4" />
+                <span className="text-xs sm:text-sm">Gemini</span>
               </button>
+              {/* 팔로워 크롤러 버튼 - 로그인한 사용자만 표시 */}
+              {currentUser && (
+                <button
+                  onClick={() => setActiveTab('followers')}
+                  className={`flex items-center gap-1 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all ${
+                    activeTab === 'followers'
+                      ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-lg'
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                  }`}
+                >
+                  <Users className="w-3 sm:w-4 h-3 sm:h-4" />
+                  <span className="text-xs sm:text-sm">팔로워</span>
+                </button>
+              )}
             </div>
             
             {/* 사용자 메뉴 */}
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
               {currentUser ? (
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
                   {/* 설정 버튼 */}
                   <button
                     onClick={() => setActiveTab('settings')}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all ${
+                    className={`p-2 rounded-lg transition-all ${
                       activeTab === 'settings'
-                        ? 'bg-gradient-to-r from-gray-600 to-gray-700 text-white shadow-lg'
-                        : 'text-gray-600 hover:bg-gray-50'
+                        ? 'bg-gray-600 text-white'
+                        : 'text-gray-600 hover:bg-gray-100'
                     }`}
+                    title="설정"
                   >
-                    <SettingsIcon className="w-5 h-5" />
-                    설정
+                    <SettingsIcon className="w-4 h-4" />
                   </button>
                   
                   {/* 관리자 버튼 (jsky9292만 표시) */}
                   {currentUser.username === 'jsky9292' && (
                     <button
                       onClick={() => setActiveTab('admin')}
-                      className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all ${
+                      className={`p-2 rounded-lg transition-all ${
                         activeTab === 'admin'
-                          ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg'
+                          ? 'bg-purple-600 text-white'
                           : 'text-purple-600 hover:bg-purple-50'
                       }`}
+                      title="관리자"
                     >
-                      <Shield className="w-5 h-5" />
-                      관리자
+                      <Shield className="w-4 h-4" />
                     </button>
                   )}
-                  <div className="text-sm">
+                  <div className="hidden sm:block text-xs">
                     <p className="font-semibold">{currentUser.username}</p>
-                    <p className="text-gray-500">사용 횟수: {currentUser.usage_count || 0}</p>
+                    <p className="text-gray-500">사용: {currentUser.usage_count || 0}</p>
                   </div>
                   <button
                     onClick={handleLogout}
-                    className="flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                    title="로그아웃"
                   >
                     <LogOut className="w-4 h-4" />
-                    로그아웃
                   </button>
                 </div>
               ) : (
                 <button
                   onClick={() => setShowAuthModal(true)}
-                  className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-lg font-semibold hover:from-blue-600 hover:to-indigo-600 transition-all shadow-lg"
+                  className="flex items-center gap-1 px-3 py-2 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-lg text-sm font-medium hover:from-blue-600 hover:to-indigo-600 transition-all shadow-lg"
                 >
-                  <User className="w-5 h-5" />
-                  로그인 / 회원가입
+                  <User className="w-4 h-4" />
+                  <span className="hidden sm:inline">로그인</span>
                 </button>
               )}
             </div>
@@ -197,18 +219,21 @@ const EnhancedInfluencerDashboard: React.FC = () => {
       ) : activeTab === 'gemini' ? (
         /* Gemini AI 분석 섹션 */
         <div className="py-12">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <GeminiAnalyzer />
-          </div>
+          <SimpleGeminiAnalyzer />
         </div>
       ) : activeTab === 'settings' ? (
         /* 설정 섹션 */
         <div className="py-12">
-          <Settings />
+          <SimpleSettings />
         </div>
       ) : activeTab === 'admin' && currentUser?.username === 'jsky9292' ? (
         /* 관리자 대시보드 */
         <AdminDashboard />
+      ) : activeTab === 'followers' && currentUser ? (
+        /* 팔로워 크롤러 */
+        <div className="py-12">
+          <FollowerCrawler />
+        </div>
       ) : null}
 
       {/* 인증 모달 */}

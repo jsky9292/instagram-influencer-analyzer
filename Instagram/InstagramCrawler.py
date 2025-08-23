@@ -98,6 +98,35 @@ class InstagramCrawler:
             caption = node.get('edge_media_to_caption', {}).get('edges', [{}])[0].get('node', {}).get('text', '')
         except Exception:
             pass
+        
+        # 음악 정보 추출 (릴스의 경우)
+        music_info = None
+        if is_reel:
+            # clips_music_attribution_info에서 음악 정보 추출
+            clips_info = node.get('clips_music_attribution_info')
+            if clips_info:
+                music_info = {
+                    'song_name': clips_info.get('song_name', ''),
+                    'artist_name': clips_info.get('artist_name', ''),
+                    'should_mute_audio': clips_info.get('should_mute_audio', False)
+                }
+            
+            # 대체 경로: music 또는 audio 정보
+            if not music_info:
+                music_data = node.get('music', {})
+                if music_data:
+                    music_info = {
+                        'song_name': music_data.get('song_name', ''),
+                        'artist_name': music_data.get('artist_name', ''),
+                        'should_mute_audio': False
+                    }
+        
+        # 해시태그 추출
+        hashtags = []
+        if caption:
+            import re
+            hashtags = re.findall(r'#(\w+)', caption)
+        
         post_type = "reel" if is_reel else "post"
         return {
             'id': node.get('id'),
@@ -106,6 +135,8 @@ class InstagramCrawler:
             'post_type': post_type,
             'media_type': media_type,
             'caption': caption,
+            'hashtags': hashtags,
+            'music': music_info,
             'like_count': like_count,
             'comment_count': comment_count,
             'view_count': view_count,
@@ -250,16 +281,52 @@ class InstagramCrawler:
                     # 필요 시 가공
                     parsed_posts = []
                     for post in recent_posts_raw:
+                        caption_text = post.get('caption', {}).get('text', '') if post.get('caption') else ''
+                        
+                        # 해시태그 추출
+                        hashtags = []
+                        if caption_text:
+                            import re
+                            hashtags = re.findall(r'#(\w+)', caption_text)
+                        
+                        # 음악 정보 추출 (릴스의 경우)
+                        music_info = None
+                        is_reel = post.get('media_type') == 2 or post.get('product_type') == 'clips'
+                        
+                        if is_reel:
+                            # clips_metadata에서 음악 정보 추출
+                            clips_metadata = post.get('clips_metadata', {})
+                            music_info_data = clips_metadata.get('music_info')
+                            
+                            if music_info_data:
+                                music_asset_info = music_info_data.get('music_asset_info', {})
+                                music_info = {
+                                    'song_name': music_asset_info.get('title', ''),
+                                    'artist_name': music_asset_info.get('display_artist', ''),
+                                    'should_mute_audio': music_asset_info.get('is_explicit', False)
+                                }
+                            
+                            # 대체 경로: audio 정보
+                            if not music_info and post.get('audio'):
+                                audio_info = post.get('audio', {})
+                                music_info = {
+                                    'song_name': audio_info.get('audio_asset_id', ''),
+                                    'artist_name': audio_info.get('artist_name', ''),
+                                    'should_mute_audio': False
+                                }
+                        
                         parsed = {
                             'id': post.get('id'),
                             'shortcode': post.get('code', ''),
-                            'is_reel': post.get('media_type', '') == 2,
-                            'post_type': 'reel' if post.get('media_type', '') == 2 else 'post',
+                            'is_reel': is_reel,
+                            'post_type': 'reel' if is_reel else 'post',
                             'media_type': post.get('media_type', ''),
-                            'caption': post.get('caption', {}).get('text', ''),
+                            'caption': caption_text,
+                            'hashtags': hashtags,
+                            'music': music_info,
                             'like_count': post.get('like_count', 0),
                             'comment_count': post.get('comment_count', 0),
-                            'view_count': post.get('view_count', None),
+                            'view_count': post.get('view_count', None) or post.get('play_count', None),
                             'thumbnail_url': post.get('image_versions2', {}).get('candidates', [{}])[0].get('url', ''),
                             'media_url': post.get('image_versions2', {}).get('candidates', [{}])[0].get('url', ''),
                             'video_url': post.get('video_versions', [{}])[0].get('url', None) if post.get('video_versions') else None,

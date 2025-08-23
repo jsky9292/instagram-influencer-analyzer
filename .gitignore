@@ -2,12 +2,52 @@
 node_modules/
 .pnp
 .pnp.js
+__pycache__/
+*.pyc
 
 # Testing
 coverage/
+temp_results/
+results/
+Instagram/results/
 
 # Next.js
 dashboard/.next/
+dashboard/out/
+
+# Build files
+build/
+dist/
+*.spec
+
+# Credentials & sensitive
+config.json
+*.db
+ig_cookies.json
+.env
+.env.local
+
+# Unnecessary files
+*.zip
+*.JPG
+*.png
+*.jpg
+agent_workspace_influ/
+Douyin/
+Shein/
+Tictok/
+test*.py
+*_test.py
+influencer_crawler.py
+youtube_downloader.py
+run_crawler_demo.py
+cleanup.py
+design.json
+netlify.toml
+*.vbs
+*.html
+nul
+*/nul
 dashboard/out/
 dashboard/build/
 dashboard/dist/

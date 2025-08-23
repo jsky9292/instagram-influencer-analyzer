@@ -1,61 +1,58 @@
-# Influencer-Crawler
+# Instagram Influencer Analyzer
 
-TikTok, Instagram, Shein, Youtube(미개발) 등에서 데이터를 수집하는 크롤러 프로젝트입니다.
+실시간 Instagram 인플루언서 분석 도구
 
----
+## 기능
 
-## 📦 환경 세팅
+- 🔍 해시태그 기반 인플루언서 실시간 검색
+- 📊 인플루언서 상세 분석 (팔로워, 참여율, 게시물)
+- 🌏 다국어 해시태그 자동 번역 (한국, 미국, 일본, 중국, 인도네시아 등)
+- 🎯 바이럴 콘텐츠 분석 및 AI 기반 콘텐츠 아이디어 생성
+- 👥 팔로워 크롤링 및 분석
+- 📈 대시보드를 통한 시각화
 
-본 프로젝트는 Python 3.10 이상에서 동작합니다.
+## 설치 방법
 
-### 1. Conda 환경 생성
+### 필요 프로그램
+- Python 3.8+
+- Node.js 18+
 
-아래 명령어로 새 conda 환경을 생성하세요.
+### 실행 방법
 
+1. 저장소 클론
 ```bash
-conda create -n influencer-crawler python=3.10
+git clone https://github.com/jsky9292/instagram-influencer-analyzer.git
+cd instagram-influencer-analyzer
 ```
 
-### 2. 환경 활성화
+2. **InstagramAnalyzer_Pro.bat** 실행
+   - 자동으로 필요한 패키지 설치
+   - Instagram 로그인 정보 입력
+   - 브라우저 자동 실행
 
-```bash
-conda activate influencer-crawler
+## 폴더 구조
+
+```
+├── dashboard/          # Next.js 웹 대시보드
+│   ├── api/           # FastAPI 백엔드 서버
+│   └── components/    # React 컴포넌트
+├── Instagram/         # Instagram 크롤러
+└── InstagramAnalyzer_Pro.bat  # 실행 파일
 ```
 
-### 3. 패키지 설치
+## 사용법
 
-```bash
-pip install -r requirements.txt
-```
+1. 프로그램 실행 후 브라우저에서 http://localhost:3000 접속
+2. 검색하고 싶은 해시태그 입력
+3. 국가 선택 (자동으로 해당 국가 언어로 번역)
+4. 인플루언서 목록 확인 및 상세 분석
 
-### 4. 패키지 추가/변경 시
+## 주의사항
 
-패키지를 새로 설치한 경우, 아래 명령어로 requirements.txt를 갱신하세요.
+- Instagram 계정이 필요합니다
+- 과도한 크롤링은 계정 제한을 받을 수 있습니다
+- config.json 파일은 Git에 포함되지 않습니다 (보안)
 
-```bash
-pip freeze > requirements.txt
-```
+## License
 
----
-
-## 🚀 실행 방법
-
-1. 환경을 활성화한 상태에서 원하는 크롤러 폴더로 이동합니다.
-2. 예시:
-    ```bash
-    cd TikTok
-    python main.py
-    ```
-
----
-
-## 📄 참고
-
--   `requirements.txt` 파일에 설치 패키지와 버전이 정의되어 있습니다.
--   추가적인 라이브러리가 필요하다면 `requirements.txt`에 패키지를 추가한 뒤 패키지를 설치하거나 갱신하세요.
-
----
-
-## 🔗 기타
-
-기타 문의 및 기능 요청은 [Issues](https://github.com/LIMSONGJIN/Influencer-Crawler/issues)에 남겨주세요.
+MIT

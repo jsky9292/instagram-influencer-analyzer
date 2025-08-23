@@ -148,7 +148,7 @@ const InfluencerDashboard: React.FC<InfluencerDashboardProps> = ({ crawledData =
   
   // 평균 게시물 수 계산
   const avgPosts = currentData.length > 0
-    ? Math.round(currentData.reduce((sum, inf) => sum + (inf.posts || 0), 0) / currentData.length)
+    ? Math.round(currentData.reduce((sum, inf) => sum + ('posts' in inf && inf.posts !== undefined ? inf.posts : 0), 0) / currentData.length)
     : 0
   
   const verifiedCount = currentData.filter(inf => inf.is_verified).length

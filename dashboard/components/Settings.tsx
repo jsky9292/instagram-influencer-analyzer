@@ -40,14 +40,12 @@ export default function Settings() {
       
       // 메인 API 상태 확인
       const mainApiResponse = await fetch(`${API_URL}/health`, {
-        method: 'GET',
-        timeout: 5000
+        method: 'GET'
       }).catch(() => null)
 
       // Gemini API 상태 확인
       const geminiApiResponse = await fetch(`${API_URL}/api/gemini/status`, {
-        method: 'GET',
-        timeout: 5000
+        method: 'GET'
       }).catch(() => null)
 
       setApiStatus({

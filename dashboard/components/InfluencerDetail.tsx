@@ -20,7 +20,11 @@ interface Post {
   taken_at_timestamp: number
   engagement_rate?: number
   hashtags?: string[]
-  music?: string
+  music?: {
+    song_name?: string
+    artist_name?: string
+    should_mute_audio?: boolean
+  } | string
 }
 
 interface InfluencerData {
@@ -393,15 +397,44 @@ const InfluencerDetail: React.FC<InfluencerDetailProps> = ({ influencer, isOpen,
                       <h4 className="font-semibold mb-2">🎵 사용한 음악</h4>
                       <div className="space-y-1">
                         {(() => {
-                          const musicList = postsData
-                            .filter(post => post.music)
-                            .map(post => post.music)
-                            .filter((music, index, self) => self.indexOf(music) === index)
+                          // 음악 정보가 있는 게시물 필터링
+                          const musicPosts = postsData.filter(post => {
+                            if (typeof post.music === 'object' && post.music) {
+                              return post.music.song_name || post.music.artist_name
+                            }
+                            return false
+                          })
+                          
+                          // 중복 제거를 위한 Map 사용
+                          const uniqueMusic = new Map()
+                          musicPosts.forEach(post => {
+                            if (post.music && typeof post.music === 'object') {
+                              const key = `${post.music.song_name}-${post.music.artist_name}`
+                              if (!uniqueMusic.has(key)) {
+                                uniqueMusic.set(key, {
+                                  song_name: post.music.song_name || '제목 없음',
+                                  artist_name: post.music.artist_name || '아티스트 미상',
+                                  count: 1
+                                })
+                              } else {
+                                uniqueMusic.get(key).count++
+                              }
+                            }
+                          })
+                          
+                          // 사용 횟수순으로 정렬
+                          const sortedMusic = Array.from(uniqueMusic.values())
+                            .sort((a, b) => b.count - a.count)
                             .slice(0, 5)
                           
-                          return musicList.length > 0 ? (
-                            musicList.map((music, idx) => (
-                              <p key={idx} className="text-sm text-gray-600">• {music}</p>
+                          return sortedMusic.length > 0 ? (
+                            sortedMusic.map((music, idx) => (
+                              <div key={idx} className="text-sm text-gray-600">
+                                <p className="font-medium">• {music.song_name}</p>
+                                {music.artist_name && (
+                                  <p className="ml-3 text-xs text-gray-500">by {music.artist_name} {music.count > 1 && `(${music.count}회)`}</p>
+                                )}
+                              </div>
                             ))
                           ) : (
                             <p className="text-sm text-gray-600">릴스 음악 정보 없음</p>

@@ -1,5 +1,5 @@
 // API URL 설정
-export const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+export const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001'
 
 // API 엔드포인트
 export const API_ENDPOINTS = {

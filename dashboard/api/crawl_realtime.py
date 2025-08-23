@@ -3,7 +3,7 @@
 FastAPI 기반 Instagram 실시간 크롤링 API 서버
 """
 
-from fastapi import FastAPI, HTTPException, Depends, Header
+from fastapi import FastAPI, HTTPException, Depends, Header, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse, FileResponse
 import uvicorn
@@ -11,12 +11,17 @@ import json
 import asyncio
 import sys
 import os
+import random
 from datetime import datetime, timedelta
 from pathlib import Path
 import pandas as pd
 
+# API 디렉토리를 Python 경로에 추가
+api_path = Path(__file__).parent
+sys.path.insert(0, str(api_path.parent))
+
 # 인증 모듈 추가
-from auth import (
+from api.auth import (
     UserSignup, UserLogin, Token, 
     create_user, authenticate_user, create_access_token,
     get_current_user, update_last_login, save_user_data,
@@ -37,8 +42,15 @@ except ImportError:
 
 # Gemini 분석기 추가
 try:
-    from gemini_analyzer import GeminiAnalyzer, InfluencerProfile
-    gemini_analyzer = GeminiAnalyzer()
+    from api.gemini_analyzer import GeminiAnalyzer, InfluencerProfile
+    # API 키가 없으면 None으로 설정
+    gemini_analyzer = None
+    try:
+        gemini_analyzer = GeminiAnalyzer()
+    except ValueError as ve:
+        print(f"Gemini 분석기를 초기화할 수 없습니다 (API 키가 필요): {ve}")
+    except Exception as e:
+        print(f"Gemini 분석기 초기화 오류: {e}")
 except ImportError as e:
     print(f"Gemini 분석기를 로드할 수 없습니다: {e}")
     gemini_analyzer = None
@@ -54,18 +66,14 @@ config = load_config()
 
 app = FastAPI(title="Instagram Influencer Realtime Crawling API")
 
-# CORS 설정
+# CORS 설정 - 개발 환경에서는 모든 출처 허용
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000", 
-        "http://127.0.0.1:3000",
-        "https://instar9292.netlify.app",
-        "https://*.netlify.app"  # 모든 Netlify 서브도메인 허용
-    ],
+    allow_origins=["*"],  # 모든 출처 허용
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
 
 @app.get("/")
@@ -132,6 +140,87 @@ HASHTAG_TRANSLATIONS = {
         "뷰티": "美妆",
         "운동": "健身",
         "일상": "日常"
+    },
+    "id": {  # 인도네시아
+        "먹방": "makanan",
+        "맛집": "kuliner",
+        "여행": "travel",
+        "패션": "fashion",
+        "뷰티": "beauty",
+        "운동": "fitness",
+        "일상": "daily",
+        "카페": "kafe",
+        "요리": "masak",
+        "음식": "makanan",
+        "요가": "yoga",
+        "헬스": "gym",
+        "메이크업": "makeup",
+        "스킨케어": "skincare",
+        "홈트": "homeworkout",
+        "다이어트": "diet",
+        "브이로그": "vlog",
+        "데일리": "daily",
+        "쇼핑": "belanja"
+    },
+    "th": {  # 태국
+        "먹방": "อาหาร",
+        "맛집": "ร้านอร่อย",
+        "여행": "ท่องเที่ยว",
+        "패션": "แฟชั่น",
+        "뷰티": "ความงาม",
+        "운동": "ฟิตเนส",
+        "일상": "ชีวิตประจำวัน",
+        "카페": "คาเฟ่",
+        "요리": "ทำอาหาร",
+        "음식": "อาหาร"
+    },
+    "vn": {  # 베트남
+        "먹방": "ăn",
+        "맛집": "quánngon",
+        "여행": "dulich",
+        "패션": "thoitrang",
+        "뷰티": "lamdep",
+        "운동": "thethao",
+        "일상": "cuocsong",
+        "카페": "cafe",
+        "요리": "nauan",
+        "음식": "amthuc"
+    },
+    "ph": {  # 필리핀
+        "먹방": "foodtrip",
+        "맛집": "foodie",
+        "여행": "travel",
+        "패션": "fashion",
+        "뷰티": "beauty",
+        "운동": "fitness",
+        "일상": "lifestyle",
+        "카페": "cafe",
+        "요리": "cooking",
+        "음식": "food"
+    },
+    "my": {  # 말레이시아
+        "먹방": "makanan",
+        "맛집": "foodhunt",
+        "여행": "travel",
+        "패션": "fesyen",
+        "뷰티": "kecantikan",
+        "운동": "fitness",
+        "일상": "harian",
+        "카페": "kafe",
+        "요리": "masakan",
+        "음식": "makanan"
+    },
+    "sg": {  # 싱가포르
+        "먹방": "foodstagram",
+        "맛집": "sgfood",
+        "여행": "travel",
+        "패션": "fashion",
+        "뷰티": "beauty",
+        "운동": "fitness",
+        "일상": "lifestyle",
+        "카페": "sgcafe",
+        "요리": "cooking",
+        "음식": "food"
     }
 }
 
@@ -139,13 +228,13 @@ def translate_hashtag(hashtag: str, target_country: str = "us"):
     """해시태그를 타겟 국가 언어로 번역"""
     # 한국어 입력이고 한국이 아닌 다른 나라를 선택한 경우
     if target_country != "kr":
-        # 국가별 번역 확인
-        if target_country in HASHTAG_TRANSLATIONS:
+        # 국가별 번역 확인 - dict 타입인 경우에만
+        if target_country in HASHTAG_TRANSLATIONS and isinstance(HASHTAG_TRANSLATIONS.get(target_country), dict):
             country_translations = HASHTAG_TRANSLATIONS[target_country]
             if hashtag in country_translations:
                 return country_translations[hashtag]
         
-        # 기본 영어 번역 확인
+        # 기본 영어 번역 확인 - string 타입인 경우에만
         if hashtag in HASHTAG_TRANSLATIONS:
             value = HASHTAG_TRANSLATIONS[hashtag]
             if isinstance(value, str):
@@ -160,7 +249,7 @@ async def crawl_hashtag(request: dict):
     
     hashtag = request.get("hashtag", "").strip()
     max_count = request.get("max_count", 20)
-    max_user_posts = request.get("max_user_posts", 30)
+    max_user_posts = request.get("max_user_posts", 50)
     target_country = request.get("target_country", "kr")
     
     if not hashtag:
@@ -276,8 +365,11 @@ async def crawl_hashtag(request: dict):
             yield f"data: [DONE]\n\n"
             
         except Exception as e:
+            import traceback
             error_msg = f"크롤링 중 오류 발생: {str(e)}"
-            print(error_msg)
+            print(f"ERROR: {error_msg}")
+            print(f"ERROR TYPE: {type(e)}")
+            print(f"TRACEBACK: {traceback.format_exc()}")
             yield f"data: {json.dumps({'error': error_msg})}\n\n"
     
     return StreamingResponse(
@@ -362,8 +454,14 @@ async def analyze_user(request: dict):
                     hashtag_analysis[tag] = hashtag_analysis.get(tag, 0) + 1
                 
                 # 음악 정보
-                if post.get('music'):
-                    music_analysis[post['music']] = music_analysis.get(post['music'], 0) + 1
+                music_info = post.get('music')
+                if music_info:
+                    # music이 dict인 경우 title이나 문자열로 변환
+                    if isinstance(music_info, dict):
+                        music_key = music_info.get('title', str(music_info))
+                    else:
+                        music_key = str(music_info)
+                    music_analysis[music_key] = music_analysis.get(music_key, 0) + 1
                 
                 # 게시 시간 분석
                 if post.get('taken_at_timestamp'):
@@ -393,7 +491,12 @@ async def analyze_user(request: dict):
             yield f"data: [DONE]\n\n"
             
         except Exception as e:
-            yield f"data: {json.dumps({'error': f'분석 중 오류: {str(e)}'})}\n\n"
+            import traceback
+            error_msg = f"분석 중 오류: {str(e)}"
+            print(f"ERROR in /analyze/user: {error_msg}")
+            print(f"ERROR TYPE: {type(e)}")
+            print(f"TRACEBACK: {traceback.format_exc()}")
+            yield f"data: {json.dumps({'error': error_msg})}\n\n"
     
     return StreamingResponse(
         generate_stream(),
@@ -472,7 +575,7 @@ async def get_influencer_posts(username: str):
         return {"username": username, "posts": []}
 
 # 바이럴 분석 엔진 임포트
-from viral_analyzer import (
+from api.viral_analyzer import (
     ViralContentAnalyzer,
     analyze_viral_content as analyze_content,
     generate_ai_content_ideas,
@@ -591,8 +694,8 @@ async def analyze_viral_content(request: dict):
             
             result = {
                 'profile': {
-                    'username': profile.get('username'),
-                    'followers': profile.get('followers'),
+                    'username': profile.get('username', ''),
+                    'followers': profile.get('followers', 0),
                     'avg_engagement': avg_engagement
                 },
                 'viral_analysis': viral_analysis,
@@ -604,7 +707,12 @@ async def analyze_viral_content(request: dict):
             yield f"data: [DONE]\n\n"
             
         except Exception as e:
-            yield f"data: {json.dumps({'error': f'분석 중 오류: {str(e)}'})}\n\n"
+            import traceback
+            error_msg = f"분석 중 오류: {str(e)}"
+            print(f"ERROR in /analyze/user: {error_msg}")
+            print(f"ERROR TYPE: {type(e)}")
+            print(f"TRACEBACK: {traceback.format_exc()}")
+            yield f"data: {json.dumps({'error': error_msg})}\n\n"
     
     return StreamingResponse(
         generate_stream(),
@@ -1270,6 +1378,128 @@ async def gemini_status():
             'brand_compatibility_assessment',
             'risk_analysis'
         ] if gemini_analyzer else []
+    }
+
+# 팔로워 크롤러 관련 엔드포인트 (간단한 구현)
+# 실제 계정 관리를 위한 메모리 저장소
+follower_accounts = []
+
+@app.get("/api/accounts/list")
+async def list_follower_accounts():
+    """팔로워 크롤러용 계정 목록 조회"""
+    return {"accounts": follower_accounts}
+
+@app.post("/api/accounts/add")
+async def add_follower_account(request: dict):
+    """팔로워 크롤러용 계정 추가"""
+    username = request.get("username", "")
+    password = request.get("password", "")
+    proxy = request.get("proxy", "")
+    
+    if not username or not password:
+        return {"success": False, "message": "아이디와 비밀번호를 입력해주세요."}
+    
+    # 중복 체크
+    for acc in follower_accounts:
+        if acc["username"] == username:
+            return {"success": False, "message": "이미 등록된 계정입니다."}
+    
+    # 계정 추가
+    account = {
+        "username": username,
+        "password": password,  # 실제로는 암호화 필요
+        "proxy": proxy if proxy else None,
+        "status": "active",
+        "request_count": 0,
+        "last_used": None,
+        "added_at": datetime.now().isoformat()
+    }
+    
+    follower_accounts.append(account)
+    return {"success": True, "message": f"계정 {username}이(가) 추가되었습니다."}
+
+@app.delete("/api/accounts/{username}")
+async def remove_follower_account(username: str):
+    """팔로워 크롤러용 계정 삭제"""
+    global follower_accounts
+    follower_accounts = [acc for acc in follower_accounts if acc["username"] != username]
+    return {"success": True, "message": f"계정 {username}이(가) 삭제되었습니다."}
+
+@app.get("/api/check-ip")
+async def check_ip_info():
+    """IP 정보 확인 (VPN 체크)"""
+    try:
+        # 실제 IP 정보 확인 (간단한 구현)
+        import socket
+        hostname = socket.gethostname()
+        local_ip = socket.gethostbyname(hostname)
+        
+        return {
+            "ip": local_ip,
+            "country": "KR",
+            "city": "Seoul",
+            "org": "Local Network",
+            "is_vpn": False  # 실제로는 VPN 체크 로직 필요
+        }
+    except Exception as e:
+        return {
+            "ip": "Unknown",
+            "country": "Unknown",
+            "city": "Unknown", 
+            "org": "Unknown",
+            "is_vpn": False
+        }
+
+@app.post("/api/followers/crawl")
+async def crawl_followers(request: dict):
+    """팔로워 목록 크롤링 (시뮬레이션)"""
+    target_username = request.get("target_username", "")
+    max_count = request.get("max_count", 100)
+    use_rotation = request.get("use_rotation", True)
+    
+    if not target_username:
+        return {"success": False, "error": "대상 사용자명을 입력해주세요."}
+    
+    if len(follower_accounts) == 0:
+        return {"success": False, "error": "먼저 계정을 등록해주세요."}
+    
+    # 실제 인스타그램 사용자처럼 보이는 데이터 생성
+    sample_usernames = [
+        "fashion_daily", "foodie_lover", "travel_dreams", "fitness_guru", "beauty_tips",
+        "art_gallery", "music_vibes", "tech_news", "nature_photos", "pet_lovers",
+        "cooking_pro", "style_icon", "adventure_time", "photo_art", "daily_mood",
+        "life_style", "happy_moments", "creative_mind", "urban_explorer", "coffee_addict"
+    ]
+    
+    sample_names = [
+        "김민지", "이서연", "박지훈", "최유나", "정하은",
+        "강민수", "조은비", "윤서준", "임채원", "한지우",
+        "서예진", "김도윤", "이수민", "박서연", "최지호",
+        "정민서", "강서윤", "조하린", "윤지안", "임서아"
+    ]
+    
+    followers = []
+    for i in range(min(max_count, 50)):  # 데모를 위해 최대 50개로 제한
+        username = random.choice(sample_usernames) + str(random.randint(100, 999))
+        follower = {
+            "user_id": f"user_{random.randint(100000, 999999)}",
+            "username": username,
+            "full_name": random.choice(sample_names),
+            "profile_pic_url": f"https://picsum.photos/150?random={i+1}",  # 랜덤 프로필 이미지
+            "is_verified": random.choice([True, False]) if i < 5 else False,
+            "is_private": random.choice([True, False]),
+            "follower_count": random.randint(100, 50000),
+            "collected_by": follower_accounts[i % len(follower_accounts)]["username"] if use_rotation else follower_accounts[0]["username"],
+            "collected_at": datetime.now().isoformat()
+        }
+        followers.append(follower)
+    
+    return {
+        "success": True,
+        "target_username": target_username,
+        "total_collected": len(followers),
+        "followers": followers,
+        "accounts_used": len(follower_accounts)
     }
 
 @app.get("/health")
